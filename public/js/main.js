@@ -47,15 +47,21 @@ function initialize() {
 
             const todoList = document.getElementById("todoList");
             todoList.innerHTML = "";
-            todos.forEach((todo, index) => {
+            todos.forEach((todo) => {
                 const listItem = document.createElement("li");
-                listItem.innerHTML = `${todo.todo} <a href="#" class="delete-task data-index="${index}">Delete</a>`;
+                listItem.innerHTML = `
+                    <label>
+                        <input type="checkbox" class="checkBoxes" id="myCheckbox" data-id="${todo._id}" ${todo.checked ? 'checked' : ''} />
+                        <span>${todo.todo}</span>
+                        <a href="#" class="delete-task" data-id="${todo._id}">Delete</a>
+                    </label>
+                `;
                 listItem.querySelector('.delete-task').addEventListener('click', async (event) => {
                     event.preventDefault();
                     const todo_res = await fetch('/update', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name, todo }),
+                        body: JSON.stringify({ name, todo_id: todo._id }),
                     });
 
                     console.log(`Deleting task: ${todo.todo}`);
@@ -67,7 +73,25 @@ function initialize() {
                     const message = document.getElementById("servermsg")
                     message.innerText = msg
                 });
+
+                listItem.querySelector('.checkBoxes').addEventListener('change', async (event) => {
+                    event.preventDefault();
+
+                    const todo_res = await fetch('/updateTodo', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, todo_id: todo._id, checked: event.target.checked }),
+                    });
+
+                    console.log(`Updating todo: ${todo.todo}`);
+
+                    const msg = await todo_res.text()
+                    console.log(msg)
             
+                    const message = document.getElementById("servermsg")
+                    message.innerText = msg
+                });
+
                 todoList.appendChild(listItem);
             });
 

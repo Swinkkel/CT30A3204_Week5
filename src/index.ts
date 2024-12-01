@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express"
+import {compile} from "morgan"
 import {User} from "./models/User"
 
 const router: Router = Router()
@@ -8,41 +9,51 @@ router.post("/add", async (req: Request, res: Response) => {
 
     console.log(req.body);
 
-    const userEntry = await User.findOne({name})
-    console.log(userEntry)
+    try {
+        const userEntry = await User.findOne({name})
+        console.log(userEntry)
 
-    if (userEntry) {
-        userEntry.todos.push({todo, checked: false});
+        if (userEntry) {
+            userEntry.todos.push({todo});
 
-        await userEntry.save();
+            await userEntry.save();
+        }
+        else {
+            const newUser = new User({
+                name: name,
+                todos: [{todo}]
+            })
+
+            console.log(newUser);
+
+            await newUser.save();
+        }
+
+        console.log(userEntry)
+
+        res.send(`Todo added successfully for user ${name}`)
     }
-    else {
-        const newUser = new User({
-            name: name,
-            todos: [{todo}]
-        })
-
-        console.log(newUser);
-
-        await newUser.save();
+    catch (error) {
+        res.status(500).send("Error adding todo");
     }
-
-    console.log(userEntry)
-
-    res.send(`Todo added successfully for user ${name}`)
 })
 
 router.get("/todos/:id", async (req: Request, res: Response) => {
     const name = req.params.id;
 
-    const userEntry = await User.findOne({name})
-    console.log(userEntry)
+    try {
+        const userEntry = await User.findOne({name})
+        console.log(userEntry)
 
-    if (!userEntry) {
-        res.status(404).send("User not found");
+        if (!userEntry) {
+            res.status(404).send("User not found");
+        }
+        else {
+            res.json(userEntry.todos);
+        }
     }
-    else {
-        res.json(userEntry.todos);
+    catch (error) {
+        res.status(500).send('Error getting todos');
     }
 })
 
@@ -59,65 +70,61 @@ router.delete("/delete", async (req: Request, res: Response) => {
     catch (e) {
         res.status(404).send("User not found.");
     }
-   
-/*
-    console.log(users)
-
-    // Find the index of the user
-    const userIndex = users.findIndex((u : TUser) => u.name === name);
-
-    if (userIndex !== -1) {
-        users.splice(userIndex, 1); // Remove user from the array
-        console.log(users)
-        res.send("User deleted successfully.");
-    } else {
-        res.status(404).send("User not found.");
-    }
-        */
 });
 
 router.put("/update", async (req: Request, res: Response) => {
-    const { name, todo } = req.body;
+    const { name, todo_id } = req.body;
 
-    const userEntry = await User.findOne({name})
-    console.log(userEntry)
+    try {
+        console.log(todo_id)
 
-    if (userEntry) {
-        const todoIndex = userEntry.todos.indexOf(todo)
-        if (todoIndex === -1) {
-            res.status(404).send("Todo not found.");
+        const userEntry = await User.findOne({name})
+        if (!userEntry) {
+            res.status(404).send("User not found");        
         }
+        else {
+            console.log(userEntry)
 
-        userEntry.todos.splice(todoIndex, 1)
+            userEntry.todos = userEntry.todos.filter((todo) => todo._id?.toString() !== todo_id);
 
-        await userEntry.save();
-
-        res.send(`Todo deleted successfully.`)
+            userEntry.save()
+            res.send(`Todo deleted successfully.`)
+        }
     }
-    else {
+    catch (error) {
         res.status(404).send("User not found");    
     }
-
-/*
-    console.log(users)
-
-    const userEntry = users.find((u : TUser) => u.name === name)
-    if (!userEntry) {
-        res.status(404).send("User not found.");
-    }
-    else {
-        const todoIndex = userEntry.todos.indexOf(todo)
-        if (todoIndex === -1) {
-            res.status(404).send("Todo not found.");
-        }
-
-        userEntry.todos.splice(todoIndex, 1)
-
-        console.log(users)
-
-        res.send(`Todo deleted successfully.`)
-    }
-        */
 })
+
+router.put("/updateTodo", async (req: Request, res: Response) => {
+    const { name, todo_id, checked } = req.body;
+
+    try {
+        console.log(todo_id)
+
+        const userEntry = await User.findOne({name})
+        if (!userEntry) {
+            res.status(404).send("User not found");        
+        }
+        else {
+            console.log(userEntry)
+
+            const todoEntry = userEntry.todos.find((t) => t._id?.toString() === todo_id);
+            if (!todoEntry) {
+                res.status(404).send("Todo not found")
+            }
+            else {
+                todoEntry.checked = checked
+
+                userEntry.save()
+                res.send(`Todo updated successfully.`)
+            }
+        }
+    }
+    catch (error) {
+        res.status(404).send("User not found");    
+    }
+})
+
 
 export default router

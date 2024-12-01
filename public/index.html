@@ -6,27 +6,47 @@
     <title>Document</title>
 
     <script src="js/main.js" defer></script>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+                
 </head>
 <body>
-    <form id="todoForm">
-        <label for="userInput">User:</label>
-        <input type="text" id="userInput" name="userInput" required>
-        <label for="todoInput">Todo:</label>
-        <input type="text" id="todoInput" name="todoInput" required>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">Todo App</a>
+        </div>
+    </nav>
 
-        <button id="submit-data">Submit</button>
-    </form>
+    <div class="container">
+        <div class="col">
+            <form id="todoForm">
+                <label for="userInput">User:</label>
+                <input type="text" id="userInput" name="userInput" required>
+                <label for="todoInput">Todo:</label>
+                <input type="text" id="todoInput" name="todoInput" required>
 
-    <p id="servermsg"></p>
+                <button class="btn" id="submit-data">Submit</button>
+            </form>
 
-    <form id="searchForm">
-        <label for="searchInput">User:</label>
-        <input type="text" id="searchInput" name="searchInput" required>
+            <p id="servermsg"></p>
+        </div>
 
-        <button id="search">Search</button>
-    </form>
 
-    <ul id="todoList"></ul>
+        <div class="col">
+            <form id="searchForm">
+                <label for="searchInput">User:</label>
+                <input type="text" id="searchInput" name="searchInput" required>
+
+                <button class="btn" id="search">Search</button>
+            </form>
+
+            <ul id="todoList"></ul>
+        </div>
+    </div>
 
 </body>
 </html>
